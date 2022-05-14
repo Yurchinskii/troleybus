@@ -22,10 +22,16 @@ class MainWindow : public QMainWindow {
 
 	private slots:
 		void openFile();
+		void saveFile();
+		void startRecord();
+		void stopRecord();
 		void moveChess();
 
 	private:
 		QLabel *position;
 		QPushButton *openButton;
+		QPushButton *saveButton;
+		QPushButton *startRecordButton;
+		QPushButton *stopRecordButton;
 };
 #endif

@@ -312,6 +312,7 @@ void MainWindow::paintEvent(QPaintEvent *) {
 	for (int i = 0; i < boardWidth; i++) {
 		p.save();
 		p.translate(squareWidth / 2 + boardMarginX + i * squareWidth, boardMarginY - 20);
+		p.rotate(180);
 		p.drawText(0, 0, horizontalChars[i]);
 		p.restore();
 		p.drawText(squareWidth / 2 + boardMarginX + i * squareWidth, boardMarginY + squareHeight * boardHeight + 20, horizontalChars[i]);
@@ -321,6 +322,7 @@ void MainWindow::paintEvent(QPaintEvent *) {
 		p.save();
 		p.drawText(boardMarginX - 20, boardMarginY + squareHeight * boardHeight - i * squareHeight - squareHeight / 2, verticalChars[i]);
 		p.translate(boardMarginX + squareHeight * boardHeight + 20, boardMarginY + squareHeight * boardHeight - i * squareHeight - squareHeight / 2);
+		p.rotate(180);
 		p.drawText(0, 0, verticalChars[i]);
 		p.restore();
 	}
