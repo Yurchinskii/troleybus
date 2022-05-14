@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QtWidgets>
 
+
 const QString imagesDir = "images/";
 const int INTERVAL = 10; // Интервал движения шахмат (меньше - быстрее)
 const QString tempfileName = ".temp";
@@ -64,11 +65,25 @@ MainWindow::MainWindow() {
 
 	setMouseTracking(true);
 
+	startRecordButton = new QPushButton("Начать запись", this);
+	stopRecordButton = new QPushButton("Завершить запись", this);
+
+	startRecordButton->setGeometry(boardMarginX, 10, 150, 50);
+	stopRecordButton->setGeometry(boardMarginX, 10, 150, 50);
+	stopRecordButton->setVisible(false);
+
+	saveButton = new QPushButton("Сохранить в файл", this);
 	openButton = new QPushButton("Открыть файл", this);
 
+	saveButton->setGeometry(boardMarginX + 170, 10, 145, 50);
 	openButton->setGeometry(boardMarginX + 170 + 165, 10, 145, 50);
 
+	saveButton->setEnabled(false);
+
 	connect(openButton, SIGNAL(clicked()), this, SLOT(openFile()));
+	connect(saveButton, SIGNAL(clicked()), this, SLOT(saveFile()));
+	connect(startRecordButton, SIGNAL(clicked()), this, SLOT(startRecord()));
+	connect(stopRecordButton, SIGNAL(clicked()), this, SLOT(stopRecord()));
 
 }
 
@@ -79,8 +94,54 @@ void MainWindow::openFile() {
 	}
 }
 
+void MainWindow::saveFile() {
+	QString filename = QFileDialog::getSaveFileName(this, "Выберите место сохранения файла", NULL, "Chess-file (*.chess)");
+	if (!filename.isNull()) {
+		
+		if (filename.indexOf(".chess", 0, Qt::CaseInsensitive) == -1) {
+			filename += ".chess";
+		}
+
+		if (QFile::copy(tempfileName, filename)) {
+			QMessageBox::information(this, "Сохранено", "Файл сохранен в " + filename);			
+		} else {
+			QMessageBox::warning(this, "Ошибка сохранения", "Файл не сохранен");
+		}
+
+	}
+}
+
+void MainWindow::startRecord() {
+	resetBoard();
+	isRecordNow = true;
+
+	stopRecordButton->setVisible(true);
+	startRecordButton->setVisible(false);
+	saveButton->setDisabled(true);
+	openButton->setDisabled(true);
+
+	if (!tempfile.open(QIODevice::WriteOnly)) {
+		QMessageBox::warning(this, "Ошибка записи", "Временный файл недоступен");
+		stopRecord();	
+	}
+}
+
+void MainWindow::stopRecord() {
+	isRecordNow = false;
+
+	stopRecordButton->setVisible(false);
+	startRecordButton->setVisible(true);
+	saveButton->setDisabled(false);
+	openButton->setDisabled(false);
+
+	tempfile.close();
+}
+
 void MainWindow::startGame(QString filename) {
+	saveButton->setEnabled(false);
 	openButton->setEnabled(false);
+	startRecordButton->setEnabled(false);
+	stopRecordButton->setEnabled(false);
 
 	resetBoard();
 
@@ -204,7 +265,10 @@ void MainWindow::nextChess(int n) {
 }
 
 void MainWindow::endGame(QString status) {
+	saveButton->setEnabled(false);
 	openButton->setEnabled(true);
+	startRecordButton->setEnabled(true);
+	stopRecordButton->setEnabled(true);
 
 	chessQueque.clear();
 	nextChessN = -1;
